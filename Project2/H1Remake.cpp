@@ -36,7 +36,6 @@ int main() {
     std::string text;
     std::vector<std::string> tokens;
     const std::regex delim("\\s+"); 
-
     while (std::cin >> text) {
         auto begin = std::sregex_token_iterator(text.begin(), text.end(), delim, -1);
         auto end = std::sregex_token_iterator();
@@ -45,14 +44,15 @@ int main() {
         }
     }
 
-    // //create .txt file for output
-    // std::ofstream output_file("output.txt");
-    // if (!output_file.is_open()) {
-    //     std::cout << "Error: could not open text output file correctly" << std::endl;
-    //     return 1;
-    // }
+    //create .txt file for output
+    std::ofstream output_file("output.txt");
+    if (!output_file.is_open()) {
+        std::cout << "Error: could not open text output file correctly" << std::endl;
+        return 1;
+    }
 
-    // insert descriptive comment
+    // if word doesn't exist in table, inserts it with count 1
+    // if word does exist, increment count by 1
     ST<std::string, int> WordTable;
     for (const auto & str : tokens) {
         auto temp = WordTable.find(str);
@@ -63,49 +63,21 @@ int main() {
         }
     }
 
-    WordTable.display();
+    // put WordTable to vector
+    std::vector<std::pair<std::string, int>> WordTableVector;
+    WordTableVector = WordTable.toVector();
 
-    //    for (const auto & str : tokens) {
-    //       auto it = wordOccurrences.find(str);
+    // stable sort vector based on values to preserve alphabetic ordering
+    std::stable_sort(WordTableVector.begin(), WordTableVector.end(),[=](const std::pair<std::string, int> &val1, const std::pair<std::string, int> &val2) {
+        return val1.second > val2.second;
+    });
 
-    //       if (it != wordOccurrences.end()) {
-    //          it->second ++;
-    //       } else {
-    //          wordOccurrences.insert(std::pair<std::string, int>(str, 1));
-    //       }
-    //    }
-
-    // fills a vector with all of the pairs from the map in O(n) time
-    // also creates a count of total and unique words in the output file
-    //    std::vector<std::pair<std::string, int>> wordsVector;
-    //    int total_words = 0;
-    //    int unique_words = 0;
-
-    //    for (const auto &wordPair : wordOccurrences) {
-    //       total_words += wordPair.second;
-    //       unique_words ++;
-    //       wordsVector.push_back(wordPair);
-    //    }
-
-    //    output_file << "The input file contains " << unique_words << " unique words, and " << total_words << " total words:" << std::endl << std::endl;
-
-    //    // sorts the vector by the value of each pair (number of appearances) using std::stable_sort in O(n lg(n)) time
-    //    std::sort(wordsVector.begin(), wordsVector.end(), [=](std::pair<std::string, int> &x, std::pair<std::string, int> &y) {
-
-    //       // I forgot to put this bit of code in initially:
-    //       if (x.second == y.second) {
-    //          return x.first > y.first;
-    //       }
-    //       // end of new code
-
-    //       return x.second > y.second;
-    //    });
-
-    //    // puts output into text file, close file
-    //    for (const auto &wordPair : wordsVector) {
-    //       output_file << wordPair.first << ": " << wordPair.second << std::endl;
-    //    }
-    //    output_file.close();
+    // output sorted vector to text file, then close output file
+    output_file << "The input file contains " << WordTable.size() << " unique words." << std::endl;
+    for (const auto &wordPair : WordTableVector) {
+        output_file << wordPair.first << ": " << wordPair.second << std::endl;
+    }
+    output_file.close();
 
     // get ending time value, calculate duration, print duration
     const auto stop = std::chrono::high_resolution_clock::now();
