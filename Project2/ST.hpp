@@ -39,8 +39,10 @@ public:
 		iterator temp = this->Search(key);
 
 		if (temp != nullptr) {
+			// if node is found, simply return its value
 			return temp->value;
 		} else {
+			// when inserting node, create a default value using the default constructor of the given type
 			Type defaultVal = Type();
 			this->insert(key, defaultVal);
 			return this->Search(key)->value;
@@ -149,6 +151,7 @@ public:
 	// print the symbol table in sorted order
 	// O(N), N size of ST
 	void display() {
+		// use toVector function, then just print that vector
 		std::vector<std::pair<Key,Type>> stVector;
 		stVector = this->toVector();
 		for (const auto & i : stVector) {
@@ -159,6 +162,7 @@ public:
 private:
 	std::size_t nodeCount;
 
+	// recursively pushes nodes in order to vector passed by reference
 	void populateVectorInOrder(iterator startingNode, std::vector<std::pair<Key,Type>> &vectorToPopulate) {
 		if (startingNode != nullptr) {
 			populateVectorInOrder(startingNode->left, vectorToPopulate);
