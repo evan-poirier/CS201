@@ -22,10 +22,15 @@ To Run: ./a.out dbfile1.txt query.txt
 #include <regex>
 #include <list>
 #include <set>
+#include <chrono>
 
 #include "Movie.hpp"
 
 int main(int argc, char *argv[]) {
+	int numRecords = 0;
+	// Get starting time
+	const auto start = std::chrono::high_resolution_clock::now();
+
 	// Open output file
 	std::ofstream outputFile("output.txt");
 	if (!outputFile.is_open()) {
@@ -58,10 +63,12 @@ int main(int argc, char *argv[]) {
 		// store the title for the movie
 		std::string currTitle = *begin;
 		++begin;
+		numRecords++;
 
 		// store a list of actors for the movie
 		std::list<std::string> currActorList;
 		for (std::sregex_token_iterator word = begin; word != end; ++word) {
+			numRecords++;
 			currActorList.push_back(*word);
 		}
 
@@ -69,6 +76,13 @@ int main(int argc, char *argv[]) {
 		Movie currMovie(currTitle, currActorList);
 		movies.AddMovie(currMovie);
 	}
+
+	// get time after creating data structure (this will also be used as the pre-search timestamp)
+	const auto ds_created_timestamp = std::chrono::high_resolution_clock::now();
+
+	// print time between start of program and end of data structure creation
+    const auto time1 = std::chrono::duration_cast<std::chrono::milliseconds>(ds_created_timestamp-start);
+    std::cout << time1.count() << " milliseconds to create data structure." << std::endl;
 
 	dbfile.close();
 
@@ -85,6 +99,16 @@ int main(int argc, char *argv[]) {
 	}
 
 	queryfile.close();
+
+	// get time after executing queries, print time to execute queries and total time
+	const auto stop = std::chrono::high_resolution_clock::now();
+    const auto time2 = std::chrono::duration_cast<std::chrono::milliseconds>(stop-ds_created_timestamp);
+    std::cout << time2.count() << " milliseconds to execute queries." << std::endl;
+	const auto time3 = std::chrono::duration_cast<std::chrono::milliseconds>(stop-start);
+    std::cout << time3.count() << " milliseconds total." << std::endl;
+	
+	// print the number of entries in the database
+	std::cout << numRecords << " records in database." << std::endl;
 
 	return 0;
 }
